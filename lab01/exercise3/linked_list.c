@@ -55,7 +55,7 @@ void print_list(struct Node *head) {
 
 /* Iteratively reverses a linked list whose first node is HEAD */
 void reverse_list(struct Node **head) {
-    if (head == NULL) {
+     if (head == NULL || *head == NULL){   // if (head == NULL) { Previously written
         return;
     }
     struct Node *curr = *head;
@@ -76,10 +76,27 @@ void add_to_back(Node **head, int data) {
     if (head == NULL) {
         return;
     }
-    Node *new_node = create_node(data);
+    //----------------Orignal logic---------------------------------
+   /* Node *new_node = create_node(data);
     Node *prev;
     for (Node *curr = *head; curr != NULL; curr = curr->next) {
         prev = curr;
     }
-    prev->next = new_node;
+    prev->next = new_node;*/
+    //-------------------------------------------------------------------
+    //----------------New Logic  added------
+    
+    Node *new_node = create_node(data);
+    Node *prev;
+    if (*head == NULL) {
+        // If the list is empty, update the head pointer
+        *head = new_node;
+        return;
+    }
+    for (Node *curr = *head; curr != NULL; curr = curr->next) {
+        prev = curr;
+    }
+     prev->next = new_node;
+    //-----------------------------------------   
 }
+

@@ -8,4 +8,5 @@ typedef struct node {
 
 int ll_has_cycle(node *);
 
+
 #endif // LL_CYCLE_H
