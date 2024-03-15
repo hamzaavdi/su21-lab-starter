@@ -1,3 +1,4 @@
+
 .globl simple_fn naive_pow inc_arr
 
 .data
@@ -55,8 +56,8 @@ main:
 # FIXME Fix the reported error in this function (you can delete lines
 # if necessary, as long as the function still returns 1 in a0).
 simple_fn:
-    mv a0, t0
-    li a0, 1
+
+    li a0, 1 # This will return a0 = 1 as required 
     ret
 
 # Computes a0 to the power of a1.
@@ -74,10 +75,13 @@ simple_fn:
 # FIXME There's a CC error with this function!
 # The big all-caps comments should give you a hint about what's
 # missing. Another hint: what does the "s" in "s0" stand for?
+
 naive_pow:
     # BEGIN PROLOGUE
+    addi sp, sp, -4     # stack space de-allocated
+    sw s0, 0(sp)        # Previous value of s0 has been preserved
     # END PROLOGUE
-    li s0, 1
+    li s0, 1            # S0 has been loaded with the new value 
 naive_pow_loop:
     beq a1, zero, naive_pow_end
     mul s0, s0, a0
@@ -85,7 +89,9 @@ naive_pow_loop:
     j naive_pow_loop
 naive_pow_end:
     mv a0, s0
-    # BEGIN EPILOGUE
+    # BEGIN EPILOGUE    
+    lw s0, 0(sp)        # Previous value of s0 has been restored 
+    addi sp, sp, 4      # stack space de-allocated
     # END EPILOGUE
     ret
 
@@ -100,30 +106,41 @@ inc_arr:
     #
     # FIXME What other registers need to be saved?
     #
-    addi sp, sp, -4
+    addi sp, sp, -16    # need to preserve the value of s0 s1 and ra
     sw ra, 0(sp)
+    sw s0, 4(sp)
+    sw s1, 8(sp)
+    sw s11,12(sp)
     # END PROLOGUE
     mv s0, a0 # Copy start of array to saved register
     mv s1, a1 # Copy length of array to saved register
-    li t0, 0 # Initialize counter to 0
+    li t0, 0  # Initialize counter to 0
 inc_arr_loop:
     beq t0, s1, inc_arr_end
     slli t1, t0, 2 # Convert array index to byte offset
     add a0, s0, t1 # Add offset to start of array
     # Prepare to call helper_fn
-    #
+    
+    mv s11,t0 # save the value of the counter t0 in s11 we don't need to
+              # store the value of t1 as it is used only to calculate the
+              # memory address which need's to be updated after each iteration 
+
     # FIXME Add code to preserve the value in t0 before we call helper_fn
     # Hint: What does the "t" in "t0" stand for?
     # Also ask yourself this: why don't we need to preserve t1?
     #
     jal helper_fn
+    mv t0, s11      # value of t0 ( loop counter ) loaded back 
     # Finished call for helper_fn
     addi t0, t0, 1 # Increment counter
     j inc_arr_loop
 inc_arr_end:
     # BEGIN EPILOGUE
+    lw s11,12(sp)
+    lw s1, 8(sp)
+    lw s0, 4(sp)
     lw ra, 0(sp)
-    addi sp, sp, 4
+    addi sp, sp, 16
     # END EPILOGUE
     ret
 
@@ -137,11 +154,17 @@ inc_arr_end:
 # as appropriate.
 helper_fn:
     # BEGIN PROLOGUE
+    addi sp sp, -8
+    sw ra, 0(sp)   
+    sw s0, 4(sp)    # need to preserve the value of s0 before it is used 
     # END PROLOGUE
     lw t1, 0(a0)
     addi s0, t1, 1
     sw s0, 0(a0)
     # BEGIN EPILOGUE
+    lw s0, 4(sp)    # load the previously stored value of s0 from stack 
+    lw ra, 0(sp)
+    addi sp, sp, 8
     # END EPILOGUE
     ret
 
@@ -174,4 +197,3 @@ failure:
     ecall
     li a0, 10 # Exit ecall
     ecall
-    

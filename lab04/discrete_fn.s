@@ -75,10 +75,16 @@ main:
 # a0 is the value we want to evaluate f at
 # a1 is the address of the "output" array (defined above).
 # Think: why might having a1 be useful?
+# f takes in two arguments:
+# a0 is the value we want to evaluate f at
+# a1 is the address of the "output" array (defined above).
+# Think: why might having a1 be useful?
 f:
-    # YOUR CODE GOES HERE!
-
-    jr ra               # Always remember to jr ra after your function!
+    addi a0, a0, 3      # shift input by 3 to use as an index
+    slli t0, a0, 2      # Calculate index by shifting left a0 by 2 (multiply by 4)
+    add t0, t0, a1      # Add the base address of the output array
+    lw a0, 0(t0)        # Load the value from the output array
+    jr ra               # Return
 
 print_int:
     mv a1, a0
